@@ -17,7 +17,7 @@ app.prepare().then(() => {
   const io = new Server(httpServer);
 
   io.on('connection', (socket) => {
-    console.log('Client connecté :', socket.id);
+    console.log('Client connect&eacute; :', socket.id);
 
     // Gestion du chat
     socket.on('join', (username) => {
@@ -27,7 +27,7 @@ app.prepare().then(() => {
     });
 
     socket.on('message', (data) => {
-      console.log('Message reçu de', data.username, ':', data.message);
+      console.log('Message re&ccedil;u de', data.username, ':', data.message);
       io.emit('message', data);
     });
 
@@ -43,14 +43,17 @@ app.prepare().then(() => {
 
     // Le diffuseur informe les watchers qu'il est actif
     socket.on('broadcaster', () => {
-      console.log('Diffusion lancée par', socket.id);
+      console.log('Diffusion lanc&eacute;e par', socket.id);
       socket.broadcast.emit('broadcaster', socket.id);
     });
 
-    // Dans server.js (ajoutez ceci dans io.on("connection", ...)
     socket.on('broadcasterStop', () => {
-      console.log('Le diffuseur', socket.id, 'a arrêté sa diffusion');
-      // Informer tous les clients que ce diffuseur a arrêté
+      console.log(
+        'Le diffuseur',
+        socket.id,
+        'a arr&ecirc;t&eacute; sa diffusion'
+      );
+      // Informer tous les clients que ce diffuseur a arr&ecirc;t&eacute;
       socket.broadcast.emit('broadcasterStop', socket.id);
     });
 
@@ -66,10 +69,21 @@ app.prepare().then(() => {
       io.to(data.target).emit('offer', { sdp: data.sdp, caller: socket.id });
     });
 
-    // Transmission d'une réponse SDP
+    // Transmission d'une r&eacute;ponse SDP
     socket.on('answer', (data) => {
-      console.log("Transfert d'une réponse de", socket.id, 'vers', data.target);
+      console.log(
+        "Transfert d'une r&eacute;ponse de",
+        socket.id,
+        'vers',
+        data.target
+      );
       io.to(data.target).emit('answer', { sdp: data.sdp, caller: socket.id });
+    });
+
+    // Relai de l'&eacute;v&egrave;nement updateStatus
+    socket.on('updateStatus', (data) => {
+      // On ajoute l'id du socket au message
+      socket.broadcast.emit('updateStatus', { id: socket.id, ...data });
     });
 
     // Transmission d'un ICE candidate
@@ -87,7 +101,7 @@ app.prepare().then(() => {
     });
 
     socket.on('disconnect', () => {
-      console.log('Client déconnecté :', socket.id);
+      console.log('Client d&eacute;connect&eacute; :', socket.id);
       delete connectedClients[socket.id];
       io.emit('clients', Object.values(connectedClients));
       socket.broadcast.emit('disconnectPeer', socket.id);
@@ -100,6 +114,6 @@ app.prepare().then(() => {
       process.exit(1);
     })
     .listen(port, () => {
-      console.log(`> Ready on http://${hostname}:${port}`);
+      console.log(`&gt; Ready on http://${hostname}:${port}`);
     });
 });
